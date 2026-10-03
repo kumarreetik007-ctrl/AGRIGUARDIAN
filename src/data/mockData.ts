@@ -1,4 +1,4 @@
-import { FarmerProfile, TelemetryData } from '../types';
+import { FarmerProfile, TelemetryData, DiagnosisResult } from '../types';
 
 export const DEMO_FARMERS: FarmerProfile[] = [
   {
@@ -98,33 +98,121 @@ export const INITIAL_TELEMETRY: TelemetryData = {
   },
 };
 
-export const PRESET_DIAGNOSES = [
+export interface LeafPreset {
+  key: string;
+  label: string;
+  labelHindi: string;
+  crop: string;
+  thumbnail: string;
+  imageUrl: string;
+  color: string;
+  summary: string;
+  confidence: number;
+  diagnosis: DiagnosisResult;
+}
+
+export const PRESET_DIAGNOSES: LeafPreset[] = [
   {
     key: 'leaf_blight',
     label: 'Leaf Blight (Early Stage)',
     labelHindi: 'पत्ती झुलसा रोग',
     crop: 'Wheat',
     thumbnail: '🍂',
+    imageUrl: 'https://images.unsplash.com/photo-1597848212624-a19eb35e2651?auto=format&fit=crop&w=900&q=80',
     color: 'rose',
     summary: 'Brown spots with yellow halos across tip margins',
+    confidence: 94,
+    diagnosis: {
+      diseaseName: 'Leaf Blight (Early Stage - Bipolaris sorokiniana)',
+      diseaseHindi: 'पत्ती झुलसा रोग (प्रारंभिक अवस्था)',
+      confidence: 94,
+      severity: 'Moderate',
+      identifiedSymptoms: 'Brown elliptical necrotic spots with distinct yellow chlorotic halos across tip margins, accompanied by mild leaf curl.',
+      identifiedSymptomsHindi: 'पत्तियों के किनारों पर पीले घेरे वाले गहरे भूरे अण्डाकार धब्बे और नोकों का सूखना।',
+      recommendedAction: '1. Restrict excess furrow irrigation to lower canopy humidity.\n2. Apply bio-fungicide or certified copper oxychloride spray (2g/L water) strictly using protective mask.',
+      recommendedActionHindi: '1. क्यारियों में अत्यधिक पानी न भरें ताकि नमी कम रहे।\n2. मास्क पहनकर कॉपर ऑक्सीक्लोराइड (2 ग्राम/लीटर) या बायो-फंगीसाइड का छिड़काव करें।',
+      organicRemedy: 'Trichoderma viride @ 5g/L + Neem oil 1500 ppm @ 3ml/L water.',
+      chemicalRemedy: 'Copper Oxychloride 50 WP @ 2.5g/L or Mancozeb 75 WP @ 2g/L.',
+      safetyWarning: 'AI advisory based on agricultural research. Always verify with your local Krishi Vigyan Kendra (KVK).',
+      visualEvidence: 'AI detected dark brown necrotic elliptical lesions with chlorotic yellow halo extending from leaf apex (matches Bipolaris fungal pattern).',
+      visualEvidenceHindi: 'पत्ती के अग्रभाग पर पीले घेरे वाले भूरे नेक्रोटिक धब्बों का स्पष्ट संरेखण देखा गया है।',
+      affectedAreaPercent: 18,
+      lesionMatchScore: 96,
+      chlorophyllHealthScore: 58,
+      pathogenType: 'Bipolaris sorokiniana (Fungal Blight)',
+      hotspotLabel: 'Necrotic lesion with yellow chlorotic halo',
+      hotspotX: 48,
+      hotspotY: 38,
+      leafImageUrl: 'https://images.unsplash.com/photo-1597848212624-a19eb35e2651?auto=format&fit=crop&w=900&q=80',
+    },
   },
   {
     key: 'yellow_rust',
     label: 'Yellow / Stripe Rust',
-    labelHindi: 'पीला रतुआ',
+    labelHindi: 'पीला रतुआ (हल्दी रोग)',
     crop: 'Wheat',
     thumbnail: '🌾',
+    imageUrl: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=900&q=80',
     color: 'amber',
-    summary: 'Bright yellow powdery stripes along leaf veins',
+    summary: 'Bright yellow powdery pustule stripes along veins',
+    confidence: 96,
+    diagnosis: {
+      diseaseName: 'Stripe / Yellow Rust (Puccinia striiformis)',
+      diseaseHindi: 'पीला रतुआ / हल्दी रोग (पुक्सीनिया)',
+      confidence: 96,
+      severity: 'High',
+      identifiedSymptoms: 'Parallel linear chains of bright orange-yellow powdery uredinial pustules rupturing leaf veins.',
+      identifiedSymptomsHindi: 'पत्तियों की नसों के समानांतर चमकीले पीले रंग की धारियों में चूर्ण जैसी फुंसियां।',
+      recommendedAction: '1. Cease nitrogen/urea fertilizer immediately.\n2. Spray Propiconazole 25% EC (Tilt) @ 1ml/L within 24-48 hours during cloud breaks.',
+      recommendedActionHindi: '1. तुरंत यूरिया का छिड़काव रोकें।\n2. प्रोपिकोनाजोल 25% EC (1 मिली/लीटर) का धूप निकलने पर तुरंत छिड़काव करें।',
+      organicRemedy: 'Pseudomonas fluorescens 10g/L + fermented cow butter milk spray.',
+      chemicalRemedy: 'Propiconazole 25 EC @ 1ml/L or Tebuconazole 25.9 EC @ 1ml/L.',
+      safetyWarning: 'Critical airborne infectious spore: clean spray tank away from drinking water wells.',
+      visualEvidence: 'Parallel longitudinal pustule stripes along vascular bundle veins with high yellow-channel saturation signature.',
+      visualEvidenceHindi: 'पत्ती की नसों में समानांतर रेखाओं में बिखरे हुए पीले बीजाणु स्पष्ट रूप से पहचाने गए हैं।',
+      affectedAreaPercent: 24,
+      lesionMatchScore: 98,
+      chlorophyllHealthScore: 51,
+      pathogenType: 'Puccinia striiformis (Fungal Rust)',
+      hotspotLabel: 'Linear uredinial pustule chains',
+      hotspotX: 52,
+      hotspotY: 45,
+      leafImageUrl: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=900&q=80',
+    },
   },
   {
     key: 'powdery_mildew',
     label: 'Powdery Mildew',
-    labelHindi: 'चूर्णिल आसिता',
+    labelHindi: 'चूर्णिल आसिता (सफेद फफूंद)',
     crop: 'Wheat/Mustard',
     thumbnail: '⚪',
+    imageUrl: 'https://images.unsplash.com/photo-1530595467537-0b5996c41f2d?auto=format&fit=crop&w=900&q=80',
     color: 'slate',
     summary: 'White talcum-powder patches on leaves and stems',
+    confidence: 89,
+    diagnosis: {
+      diseaseName: 'Powdery Mildew (Blumeria graminis)',
+      diseaseHindi: 'चूर्णिल आसिता (सफेद फफूंद)',
+      confidence: 89,
+      severity: 'Moderate',
+      identifiedSymptoms: 'Superficial fluffy white to grayish-white powdery fungal colonies on upper leaf surfaces.',
+      identifiedSymptomsHindi: 'पत्तियों की ऊपरी सतह और तने पर सफेद पाउडर जैसी फफूंद के गोल धब्बे।',
+      recommendedAction: '1. Improve field aeration by thinning border weeds.\n2. Spray wettable sulfur 80% WP @ 2.5-3g/L or bio-sulfur.',
+      recommendedActionHindi: '1. खेत की मेड़ों से खरपतवार हटाएं ताकि हवा का संचार बना रहे।\n2. घुलनशील सल्फर 80% WP (2.5-3 ग्राम/लीटर) का छिड़काव करें।',
+      organicRemedy: 'Potassium bicarbonate (3g/L) + Neem extract.',
+      chemicalRemedy: 'Sulfur 80 WP @ 2.5g/L or Hexaconazole 5 EC @ 1ml/L.',
+      safetyWarning: 'Do not spray sulfur in mid-day temperatures exceeding 35°C to prevent leaf scorch.',
+      visualEvidence: 'High-frequency white mycelial micro-texture on adaxial leaf surface with localized chlorophyll inhibition.',
+      visualEvidenceHindi: 'पत्ती की ऊपरी सतह पर सफेद कवकजाल (माइसीलियम) की परत साफ दिखाई दे रही है।',
+      affectedAreaPercent: 14,
+      lesionMatchScore: 92,
+      chlorophyllHealthScore: 65,
+      pathogenType: 'Blumeria graminis (Erysiphales)',
+      hotspotLabel: 'Superficial fungal mycelium colony',
+      hotspotX: 42,
+      hotspotY: 52,
+      leafImageUrl: 'https://images.unsplash.com/photo-1530595467537-0b5996c41f2d?auto=format&fit=crop&w=900&q=80',
+    },
   },
   {
     key: 'healthy',
@@ -132,8 +220,33 @@ export const PRESET_DIAGNOSES = [
     labelHindi: 'स्वस्थ हरी पत्तियां',
     crop: 'All Crops',
     thumbnail: '🌱',
+    imageUrl: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=900&q=80',
     color: 'emerald',
     summary: 'Vibrant green chlorophyll, no fungal or pest damage',
+    confidence: 98,
+    diagnosis: {
+      diseaseName: 'Healthy Crop Foliage (Optimal Vigor)',
+      diseaseHindi: 'स्वस्थ हरी फसल (उत्कृष्ट स्वास्थ्य)',
+      confidence: 98,
+      severity: 'Low',
+      identifiedSymptoms: 'Uniform deep green chlorophyll distribution, intact cuticle, zero necrotic lesions or fungal pustules.',
+      identifiedSymptomsHindi: 'गहरा हरा रंग, पत्तियों पर कोई दाग-धब्बे या फफूंद नहीं, तंदुरुस्त विकास।',
+      recommendedAction: 'Maintain current balanced moisture. Apply recommended micro-nutrient foliar spray (Zinc & Iron chelate) at tillering.',
+      recommendedActionHindi: 'सिंचाई का संतुलन बनाए रखें। कल्ले फूटने के समय अनुशंसित जिंक व सूक्ष्म पोषक तत्वों का छिड़काव करें।',
+      organicRemedy: 'Vermicompost tea foliar spray to boost natural plant immunity.',
+      chemicalRemedy: 'No synthetic chemicals required! Input costs saved.',
+      safetyWarning: 'Continue periodic monitoring twice a week.',
+      visualEvidence: 'Healthy NDVI-equivalent chlorophyll reflectance curve, intact cellular margins, zero necrotic lesion vectors.',
+      visualEvidenceHindi: 'स्वस्थ क्लोरोफिल वितरण, तंदुरुस्त कोशिकीय संरचना, किसी भी रोगज़नक़ के लक्षण नहीं।',
+      affectedAreaPercent: 0,
+      lesionMatchScore: 2,
+      chlorophyllHealthScore: 98,
+      pathogenType: 'None (Healthy Plant Tissue)',
+      hotspotLabel: 'Optimal chlorophyll vigor zone',
+      hotspotX: 50,
+      hotspotY: 50,
+      leafImageUrl: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=900&q=80',
+    },
   },
 ];
 

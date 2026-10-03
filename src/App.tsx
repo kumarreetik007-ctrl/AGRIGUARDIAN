@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Language, FarmerProfile, TelemetryData } from './types';
-import { DEMO_FARMERS, INITIAL_TELEMETRY } from './data/mockData';
+import { Language, FarmerProfile, TelemetryData, DiagnosisResult } from './types';
+import { DEMO_FARMERS, INITIAL_TELEMETRY, PRESET_DIAGNOSES } from './data/mockData';
 import { Header } from './components/Header';
 import { NavigationDrawer } from './components/NavigationDrawer';
 import { HeroSection } from './components/HeroSection';
@@ -35,8 +35,13 @@ export default function App() {
     return DEMO_FARMERS[0];
   });
 
-  // Telemetry Sensor State
+  // Fast Telemetry State & IoT Streamer
   const [telemetry, setTelemetry] = useState<TelemetryData>(INITIAL_TELEMETRY);
+  const [isStreamingActive, setIsStreamingActive] = useState<boolean>(true);
+
+  // Plant Leaf Diagnosis & Confidence State according to leaf pic
+  const [activeLeafDiagnosis, setActiveLeafDiagnosis] = useState<DiagnosisResult>(PRESET_DIAGNOSES[0].diagnosis);
+  const [activePresetKey, setActivePresetKey] = useState<string>('leaf_blight');
 
   // Modals state
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -55,11 +60,115 @@ export default function App() {
           setTelemetry(data);
         }
       } catch (e) {
-        // Fallback
+        // Fallback to initial
       }
     };
     fetchTelemetry();
   }, []);
+
+  // Continuous Fast IoT Sensor stream (live telemetry updates with ±0.8% micro fluctuation)
+  useEffect(() => {
+    if (!isStreamingActive) return;
+
+    const timer = setInterval(() => {
+      const jitter = (Math.random() * 1.6 - 0.8);
+      setTelemetry((prev) => {
+        const current = prev.metrics.soilMoisturePercent;
+        const next = Math.min(85, Math.max(38, Math.round(current + jitter)));
+        if (next === current) return prev;
+
+        return {
+          ...prev,
+          timestamp: new Date().toISOString(),
+          metrics: {
+            ...prev.metrics,
+            soilMoisturePercent: next,
+            soilMoistureStatus: next > 72 ? 'High' : next < 45 ? 'Low' : 'Adequate',
+          },
+        };
+      });
+    }, 2000);
+
+    return () => clearInterval(timer);
+  }, [isStreamingActive]);
+
+  // Central Dynamic Telemetry & Decision Intelligence engine
+  const updateTelemetryMetrics = (newMoisture: number, newRain?: number) => {
+    setTelemetry((prev) => {
+      const moisture = Math.min(95, Math.max(20, Math.round(newMoisture)));
+      const rain = newRain !== undefined ? Math.min(100, Math.max(0, Math.round(newRain))) : prev.metrics.rainProbabilityPercent;
+
+      let action = 'DELAY_IRRIGATION';
+      let headline = 'Delay irrigation today. Rainfall expected tomorrow.';
+      let headlineHindi = 'आज सिंचाई टालें। कल बारिश का पूर्वानुमान है।';
+      let priority = 'HIGH (Rain Alert)';
+      let waterSaved = 1400;
+      let savings = 340;
+
+      if (rain >= 55) {
+        action = 'DELAY_IRRIGATION';
+        headline = 'Delay irrigation today. Rainfall expected tomorrow.';
+        headlineHindi = 'आज सिंचाई टालें। कल बारिश का पूर्वानुमान है।';
+        priority = 'HIGH (Rain Alert)';
+        waterSaved = 1400;
+        savings = 340;
+      } else if (moisture < 45) {
+        action = 'IRRIGATE_NOW';
+        headline = `Moisture low at ${moisture}%. Schedule light irrigation now.`;
+        headlineHindi = `नमी ${moisture}% तक घट गई है। तुरंत हल्की सिंचाई करें।`;
+        priority = 'URGENT (Moisture Deficit)';
+        waterSaved = 0;
+        savings = 0;
+      } else if (moisture > 72) {
+        action = 'DRAINAGE_ALERT';
+        headline = `Soil moisture saturated at ${moisture}%. Inspect field drainage.`;
+        headlineHindi = `मिट्टी में नमी ${moisture}% है। जलभराव रोकने हेतु जल निकासी सुनिश्चित करें।`;
+        priority = 'NOTICE (Saturated Soil)';
+        waterSaved = 2100;
+        savings = 480;
+      } else {
+        action = 'MAINTAIN_SCHEDULE';
+        headline = `Moisture is balanced at ${moisture}%. Soil health optimal.`;
+        headlineHindi = `नमी ${moisture}% पर संतुलित है। अतिरिक्त पानी की आवश्यकता नहीं है।`;
+        priority = 'OPTIMAL';
+        waterSaved = 800;
+        savings = 210;
+      }
+
+      return {
+        ...prev,
+        timestamp: new Date().toISOString(),
+        metrics: {
+          ...prev.metrics,
+          soilMoisturePercent: moisture,
+          soilMoistureStatus: moisture > 72 ? 'High' : moisture < 45 ? 'Low' : 'Adequate',
+          rainProbabilityPercent: rain,
+          rainExpectedArrival: rain >= 55 ? 'Tomorrow, ~2:00 PM' : 'Clear skies next 48h',
+        },
+        recommendation: {
+          action,
+          headline,
+          headlineHindi,
+          priority,
+          waterSavedEstimateLiters: waterSaved,
+          savingsInr: savings,
+        },
+      };
+    });
+  };
+
+  // Synchronize plant leaf picture selection between Hero and Crop Doctor
+  const handleSelectPresetLeaf = (presetKey: string) => {
+    setActivePresetKey(presetKey);
+    const found = PRESET_DIAGNOSES.find((p) => p.key === presetKey);
+    if (found) {
+      setActiveLeafDiagnosis(found.diagnosis);
+    }
+  };
+
+  const handleDiagnosisChange = (diagnosis: DiagnosisResult, _imageUrl: string) => {
+    setActiveLeafDiagnosis(diagnosis);
+  };
 
   const handleSelectFarmer = (farmer: FarmerProfile) => {
     setCurrentFarmer(farmer);
@@ -131,7 +240,7 @@ export default function App() {
 
       {/* Main Expansive Website Body */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-12 sm:space-y-16">
-        {/* 1. Hero Section (2-Column Responsive Layout on Desktop) */}
+        {/* 1. Hero Section (2-Column Responsive Layout with Leaf Picture & Live Telemetry) */}
         <HeroSection
           language={language}
           onOpenTelemetry={() => setIsTelemetryOpen(true)}
@@ -143,6 +252,9 @@ export default function App() {
             const el = document.getElementById('sustainability');
             el?.scrollIntoView({ behavior: 'smooth' });
           }}
+          activeLeafDiagnosis={activeLeafDiagnosis}
+          onSelectPresetLeaf={handleSelectPresetLeaf}
+          telemetry={telemetry}
         />
 
         {/* 2. Trust Strip Pill Rail */}
@@ -156,6 +268,10 @@ export default function App() {
               telemetry={telemetry}
               currentFarmer={currentFarmer}
               onOpenTelemetry={() => setIsTelemetryOpen(true)}
+              onUpdateMoisture={(val) => updateTelemetryMetrics(val)}
+              onUpdateRain={(val) => updateTelemetryMetrics(telemetry.metrics.soilMoisturePercent, val)}
+              isStreaming={isStreamingActive}
+              onToggleStreaming={() => setIsStreamingActive((prev) => !prev)}
             />
           </div>
           <div className="lg:col-span-7">
@@ -165,12 +281,17 @@ export default function App() {
               currentFarmer={currentFarmer}
               onAskAI={handleAskAI}
               onRecordSaved={() => {}}
+              onUpdateMoisture={(val) => updateTelemetryMetrics(val)}
             />
           </div>
         </div>
 
-        {/* 4. AI Crop Doctor Visual Diagnostic Studio (2-Column Layout) */}
-        <CropDoctor language={language} />
+        {/* 4. AI Crop Doctor Visual Diagnostic Studio (2-Column Layout with exact confidence according to leaf pic) */}
+        <CropDoctor
+          language={language}
+          activePresetKey={activePresetKey}
+          onDiagnosisChange={handleDiagnosisChange}
+        />
 
         {/* 5. Farmer-First Inclusivity & 24/7 Krishi Mitra AI Side-by-Side on Desktop */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
@@ -295,6 +416,7 @@ export default function App() {
         onClose={() => setIsTelemetryOpen(false)}
         language={language}
         telemetry={telemetry}
+        onUpdateTelemetry={(m, r) => updateTelemetryMetrics(m, r)}
       />
 
       <AuthModal

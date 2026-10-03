@@ -76,6 +76,16 @@ export interface DiagnosisResult {
   organicRemedy: string;
   chemicalRemedy: string;
   safetyWarning: string;
+  visualEvidence?: string;
+  visualEvidenceHindi?: string;
+  affectedAreaPercent?: number;
+  lesionMatchScore?: number;
+  chlorophyllHealthScore?: number;
+  pathogenType?: string;
+  hotspotLabel?: string;
+  hotspotX?: number;
+  hotspotY?: number;
+  leafImageUrl?: string;
 }
 
 export interface Comment {
