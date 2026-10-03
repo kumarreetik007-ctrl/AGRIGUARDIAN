@@ -1,0 +1,7 @@
+{
+  "name": "AgriGuardian - AI Farm Companion",
+  "description": "AI-powered bilingual agricultural assistant for crop disease diagnosis, smart irrigation, real-time farm data visualization, and farmer community knowledge sharing.",
+  "requestFramePermissions": ["camera", "microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+

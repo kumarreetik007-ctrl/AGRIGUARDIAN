@@ -1,0 +1,47 @@
+@import "tailwindcss";
+
+@theme {
+  --color-forest-950: #081a0f;
+  --color-forest-900: #0f2e1b;
+  --color-forest-800: #143d22;
+  --color-forest-700: #1b4332;
+  --color-forest-600: #245a43;
+  --color-leaf-700: #2d6a4f;
+  --color-leaf-600: #40916c;
+  --color-leaf-500: #52b788;
+  --color-leaf-400: #74c69d;
+  --color-leaf-300: #95d5b2;
+  --color-leaf-200: #b7e4c7;
+  --color-leaf-100: #d8f3dc;
+  --color-soil-800: #6f3e22;
+  --color-soil-700: #8c5332;
+  --color-soil-500: #b07d62;
+  --color-soil-100: #f5ebe0;
+  --color-cream-50: #fcfbf8;
+  --color-cream-100: #faf8f2;
+  --color-cream-200: #f5f2e9;
+  --color-cream-300: #ede8dc;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(1.35); }
+}
+
+.animate-pulse-dot {
+  animation: pulse-dot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.score-circle-progress {
+  stroke-dasharray: 440;
+  stroke-dashoffset: calc(440 - (440 * 78) / 100);
+  transition: stroke-dashoffset 1.5s ease-in-out;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
